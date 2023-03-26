@@ -70,4 +70,15 @@ class APIS {
         .doc(user.uid)
         .set(newChatUser.toJson()));
   }
+
+
+  ///---------------- Chat screen related APIs ----------------
+
+  // to get all the messages
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getAllMessages() {
+    return fireStoreFirebase
+        .collection('messages')
+        .snapshots();
+  }
+
 }
