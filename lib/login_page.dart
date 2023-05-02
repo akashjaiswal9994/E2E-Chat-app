@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:major_project/Uitlity/progress_bar.dart';
 import 'package:major_project/app_colors.dart';
@@ -6,6 +8,7 @@ import 'package:major_project/auth_functions.dart';
 import 'package:major_project/responsive_app.dart';
 import 'package:major_project/sign_up_page.dart';
 import 'package:major_project/user_main_page.dart';
+import 'package:xen_popup_card/xen_card.dart';
 //import 'package:major_project/user_main_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -16,12 +19,14 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+   FirebaseAuth auth = FirebaseAuth.instance;
    bool loading =false;
   final _formKey = GlobalKey<FormState>();
   String email = '';
   final emailController = TextEditingController();
   String password = " ";
   bool isPasswordVisible = false;
+
   @override
   void initstate() {
     super.initState();
@@ -203,7 +208,33 @@ class _LoginPageState extends State<LoginPage> {
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
-                            onPressed: ()  {},
+                            onPressed: ()  {
+                              showDialog(
+                                context: context,
+                                builder: (builder) => Padding(
+                                  padding: const EdgeInsets.all(28.0),
+                                  child: XenPopupCard(
+                                    appBar: const XenCardAppBar(child: Text('Forgot Password'),
+
+                                    ),
+                                    body: ListView(
+                                      children: [
+                                       buildEmail(),
+                                        SizedBox(
+                                          height: height * 0.01,
+                                        ),
+                                        ElevatedButton(onPressed: (){
+                                         auth.sendPasswordResetEmail(email: emailController.text.toString());
+                                         Navigator.of(context).pop();
+                                        }, child: const Text("Submit"))
+
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+
+                            },
                             child: Text(
                               'Forgot Password ?',
                               style: ralewayStyle.copyWith(
@@ -226,7 +257,7 @@ class _LoginPageState extends State<LoginPage> {
                               onPressed: (){
 
 
-                                if (_formKey.currentState!.validate()) {
+                                if(_formKey.currentState!.validate()) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Container(

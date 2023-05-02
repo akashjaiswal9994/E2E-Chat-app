@@ -1,9 +1,8 @@
-import 'dart:math';
+
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:major_project/API/apis.dart';
 import 'package:major_project/login_page.dart';
 import 'package:major_project/user_main_page.dart';
 

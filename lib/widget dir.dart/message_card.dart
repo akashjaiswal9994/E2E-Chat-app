@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:major_project/API/apis.dart';
+import 'package:major_project/Uitlity/My_date_util.dart';
 import 'package:major_project/model/messages.dart';
 
 class MessageCard extends StatefulWidget {
@@ -14,11 +15,14 @@ class _MessageCardState extends State<MessageCard> {
   @override
   Widget build(BuildContext context) {
     return APIS.user.uid == widget.messages.fromID
-        ? senderMessage()
-        : receiverMessage();
+        ? receiverMessage()
+        : senderMessage();
   }
 
   Widget senderMessage() {
+    if(widget.messages.read!.isEmpty){
+      APIS.updateMessageReadStatus(widget.messages);
+    }
     return Row(
       children: [
         Flexible(
@@ -37,21 +41,29 @@ class _MessageCardState extends State<MessageCard> {
         ),
         Padding(
           padding: const EdgeInsets.all(4.0),
-          child: Text(widget.messages.send.toString(),style: const TextStyle(fontSize: 11,color: Colors.black),),
+          child: Text(MyDateUtil.getFormattedTime(context: context, time: widget.messages.send.toString()),style: const TextStyle(fontSize: 11,color: Colors.black),),
         ),
-        const Icon(Icons.done_all_rounded,color: Colors.blue,),
+
+        // double tick
+        if(widget.messages.read!.isNotEmpty)
+          const Icon(Icons.done_all_rounded,color: Colors.blue,),
       ],
     );
   }
 
   Widget receiverMessage() {
+
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
+        //double text
+        if(widget.messages.read!.isNotEmpty)
         const Icon(Icons.done_all_rounded,color: Colors.blue,),
+        // send timing
         Padding(
           padding: const EdgeInsets.all(4.0),
-          child: Text(widget.messages.send.toString(),style: const TextStyle(fontSize: 11,color: Colors.black),),
+          child: Text(MyDateUtil.getFormattedTime(context: context, time: widget.messages.send.toString()),style: const TextStyle(fontSize: 11,color: Colors.black),),
         ),
         Flexible(
           child: Container(

@@ -1,9 +1,12 @@
-import 'dart:convert';
-import 'dart:developer';
+
+
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:major_project/main.dart';
 import 'package:major_project/model/messages.dart';
 import 'package:major_project/model/user_chat.dart';
 import 'package:major_project/widget%20dir.dart/message_card.dart';
@@ -21,6 +24,9 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   // for storing all messages
   List<Messages> list = [];
+  final _textController=TextEditingController();
+  /// for showing emoji\\\
+bool isShowEmoji=false;
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -36,34 +42,26 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             Expanded(
               child: StreamBuilder(
-                stream: APIS.getAllMessages(),
+                stream: APIS.getAllMessages(widget.userChat),
                 builder: (context, snapshot) {
                   switch (snapshot.connectionState) {
                     // if data is loading
                     case ConnectionState.waiting:
                     case ConnectionState.none:
                       return const Center(child: CircularProgressIndicator());
+                     //final data=snapshot.data?.docs;
+
+
 
                     //if some or all data is loaded then show it
                     case ConnectionState.active:
                     case ConnectionState.done:
                       final data = snapshot.data?.docs;
-                      log('data: ${jsonEncode(data![0].data())}');
-                      list.clear();
-                      list.add(Messages(
-                          send: "12:00",
-                          toId: "xyz",
-                          type: "check",
-                          msg: "hi",
-                          fromID: APIS.user.uid,
-                          read: "no"));
-                      list.add(Messages(
-                          send: "12:06",
-                          toId: APIS.user.uid,
-                          type: "check",
-                          msg: "hi",
-                          fromID: "test1",
-                          read: "no"));
+                      list = data
+                          ?.map((e) => Messages.fromJson(e.data()))
+                          .toList() ??
+                          [];
+
 
                       if (list.isNotEmpty) {
                         return ListView.builder(
@@ -88,6 +86,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ),
             _chatInput(),
+
           ],
         ),
       ),
@@ -168,7 +167,11 @@ class _ChatScreenState extends State<ChatScreen> {
                 children: [
                   // emoji button
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      setState(() {
+                        isShowEmoji=!isShowEmoji;
+                      });
+                    },
                     icon: const Icon(
                       Icons.emoji_emotions_rounded,
                       color: Colors.blueAccent,
@@ -176,11 +179,12 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
                   ),
 
-                  const Expanded(
+                   Expanded(
                       child: TextField(
+                        controller: _textController,
                     keyboardType: TextInputType.multiline,
                     maxLines: null,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: 'Type Something.....',
                       border: InputBorder.none,
                       hintStyle: TextStyle(color: Colors.blueAccent),
@@ -211,7 +215,12 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           MaterialButton(
-            onPressed: () {},
+            onPressed: () {
+              if(_textController.text.isNotEmpty){
+                APIS.sendMessages(widget.userChat, _textController.text);
+                _textController.text='';
+              }
+            },
             minWidth: 0,
             padding:
                 const EdgeInsets.only(left: 10, right: 5, top: 10, bottom: 10),
